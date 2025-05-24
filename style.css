@@ -1,0 +1,98 @@
+body {
+    font-family: monospace;
+    margin: 0;
+}
+article nav {
+    background-color: grey;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    align-items: center;
+}
+article nav a {
+    text-decoration: none;
+    color: white;
+}
+#homeLink {
+    padding-left: 10px;
+}
+#logo {
+    padding-right: 10px;
+}
+#internalBar {
+    display: flex;
+    gap: 20px;
+}
+#internalBar a {
+    text-decoration: none;
+    color: white;
+}
+#mainContainer {
+    background-color: rgb(52, 56, 56);
+}
+#homeContainer {
+    position: relative;
+}
+#homeContainer #backgroundImage {
+    width: 100%;
+    filter: blur(20px);
+}
+#geoguessr {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: -50%;
+    display: none;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    padding-top: 10px;
+}
+#geoguessr #image {
+    width: 400px;
+    border-radius: 10px;
+}
+footer {
+    background-color: grey;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+footer span {
+    background-color: black;
+    color: white;
+    padding-bottom: 2px; padding-left: 2px; padding-right: 2px;
+}
+#message {
+    position: absolute;
+    color: white;
+    top: 35%;
+    left: 50%;
+    translate: -50%;
+    background-color: rgb(65, 59, 59);
+    padding: 50px;
+    border-radius: 10px;
+    box-shadow: 0 15px 40px 10px rgba(0, 0, 0, 0.747);
+    border: 2px solid rgba(255, 255, 255, 0.322);
+}
+#information {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: -50%;
+    display: none;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    padding-top: 10px;
+        position: absolute;
+    color: white;
+    top: 35%;
+    left: 50%;
+    translate: -50%;
+    background-color: rgb(65, 59, 59);
+    padding: 50px;
+    border-radius: 10px;
+    box-shadow: 0 15px 40px 10px rgba(0, 0, 0, 0.747);
+    border: 2px solid rgba(255, 255, 255, 0.322);
+}
