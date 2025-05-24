@@ -16,10 +16,12 @@ firebase.initializeApp(firebaseConfig);
 // Realtime Database ref
 const db = firebase.database();
 const startFlagRef = db.ref('startSlideshow');
+const startTimeRef = db.ref('startTime');
 
 let currentImageIndex = 0;
 let imageLoopInterval = null;
 let startGeoguessr = false;
+let timerInterval = null;
 
 const images = [
     "Geoguessr1.jpg",
@@ -74,14 +76,14 @@ startFlagRef.on('value', (snapshot) => {
   }
 });
 
-// 🕒 Real-time start based on Firebase timestamp
-const startTimeRef = db.ref('startTime');
+// Real-time countdown based on Firebase 'startTime'
 const countdownEl = document.getElementById('countdown');
 
 startTimeRef.on('value', (snapshot) => {
   const scheduledTime = snapshot.val();
-
   if (!scheduledTime) return;
+
+  if (timerInterval) clearInterval(timerInterval);
 
   const updateCountdown = () => {
     const now = Date.now();
@@ -102,8 +104,8 @@ startTimeRef.on('value', (snapshot) => {
     countdownEl.textContent = `Starts in ${hours}h ${minutes}m ${seconds}s`;
   };
 
-  updateCountdown(); // initial call
-  const timerInterval = setInterval(updateCountdown, 1000);
+  updateCountdown();
+  timerInterval = setInterval(updateCountdown, 1000);
 });
 
 function home() {
