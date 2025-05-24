@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <article>
-        <nav>
-            <a href="#" id="homeLink" onclick="home()">Home</a>
-            <div id="internalBar">
-                <a href="#" onclick="geoguessr()">Geoguessr: MD</a>
-                <a href="#">[REDACTED]</a>
-                <a href="#">[REDACTED]</a>
-                <a href="#">[REDACTED]</a>
-            </div>
-            <p id="logo">Logo</p>
-    </article>
-    <div id="mainContainer">
+  <article>
+    <nav>
+      <a href="#" id="homeLink" onclick="home()">Home</a>
+      <div id="internalBar">
+        <a href="#" onclick="geoguessr()">Geoguessr: MD</a>
+        <a href="#">[REDACTED]</a>
+        <a href="#">[REDACTED]</a>
+        <a href="#">[REDACTED]</a>
+      </div>
+      <p id="logo">Logo</p>
+    </nav>
+  </article>
+  <div id="mainContainer">
     <div id="homeContainer">
-        <img src="0523 (1)(1).gif" alt="" id="backgroundImage">
-        <div id="message">
-            <p>Under Construction...</p>
-        </div>
-        <div id="geoguessr">
-            <h1>Geoguessr: Murder Drones #<span id="number">1</span></h1>
-            <img src="Serial Gemini-Ugkxe7dGdSbxpOM4S2xQdolxMmTwpC7QFoPf-1.jpg" alt="" id="image">
-        </div>
-        <div id="information">
-            <p>Check till Monday 2PM</p>
-            <p id="countdown">Loading countdown...</p>
-        </div>
+      <img src="0523 (1)(1).gif" alt="" id="backgroundImage" />
+      <div id="message" style="display:flex;">
+        <p>Under Construction...</p>
+      </div>
+      <div id="geoguessr" style="display:none;">
+        <h1>Geoguessr: Murder Drones #<span id="number">1</span></h1>
+        <img
+          src="Serial Gemini-Ugkxe7dGdSbxpOM4S2xQdolxMmTwpC7QFoPf-1.jpg"
+          alt=""
+          id="image"
+        />
+      </div>
+      <div id="information" style="display:none;">
+        <p>Check till Monday 2PM</p>
+        <p id="countdown">Loading countdown...</p>
+      </div>
     </div>
-    </div>
-    <footer>
-        <p><span>[REDACTED]</span> Inc.</p>
-    </footer>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="index.js"></script>
+  </div>
+  <footer>
+    <p><span>[REDACTED]</span> Inc.</p>
+  </footer>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
