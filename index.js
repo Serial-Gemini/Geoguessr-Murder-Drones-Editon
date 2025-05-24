@@ -76,22 +76,34 @@ startFlagRef.on('value', (snapshot) => {
 
 // 🕒 Real-time start based on Firebase timestamp
 const startTimeRef = db.ref('startTime');
+const countdownEl = document.getElementById('countdown');
 
 startTimeRef.on('value', (snapshot) => {
   const scheduledTime = snapshot.val();
 
-  if (scheduledTime && Date.now() >= scheduledTime) {
-    startGeoguessr = true;
-    geoguessr();
-  } else {
-    const checkTimer = setInterval(() => {
-      if (Date.now() >= scheduledTime) {
-        startGeoguessr = true;
-        geoguessr();
-        clearInterval(checkTimer);
-      }
-    }, 1000);
-  }
+  if (!scheduledTime) return;
+
+  const updateCountdown = () => {
+    const now = Date.now();
+    const diff = scheduledTime - now;
+
+    if (diff <= 0) {
+      startGeoguessr = true;
+      geoguessr();
+      countdownEl.textContent = "Starting...";
+      clearInterval(timerInterval);
+      return;
+    }
+
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    countdownEl.textContent = `Starts in ${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  updateCountdown(); // initial call
+  const timerInterval = setInterval(updateCountdown, 1000);
 });
 
 function home() {
