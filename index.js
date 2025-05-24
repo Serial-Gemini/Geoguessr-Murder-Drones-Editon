@@ -74,11 +74,25 @@ startFlagRef.on('value', (snapshot) => {
   }
 });
 
-// For testing: start immediately after 5 seconds (optional, can remove later)
-setTimeout(() => {
+// 🕒 Real-time start based on Firebase timestamp
+const startTimeRef = db.ref('startTime');
+
+startTimeRef.on('value', (snapshot) => {
+  const scheduledTime = snapshot.val();
+
+  if (scheduledTime && Date.now() >= scheduledTime) {
     startGeoguessr = true;
     geoguessr();
-}, 5000);
+  } else {
+    const checkTimer = setInterval(() => {
+      if (Date.now() >= scheduledTime) {
+        startGeoguessr = true;
+        geoguessr();
+        clearInterval(checkTimer);
+      }
+    }, 1000);
+  }
+});
 
 function home() {
     document.getElementById("geoguessr").style.display = "none";
