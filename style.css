@@ -63,7 +63,7 @@ footer span {
     color: white;
     padding-bottom: 2px; padding-left: 2px; padding-right: 2px;
 }
-#manualOverride {
+#geoguessr a {
     color: white;
     padding-top: 30px;
     font-size: 20em;
