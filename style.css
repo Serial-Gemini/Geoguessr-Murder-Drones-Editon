@@ -72,6 +72,7 @@ footer span {
     font-family: monospace;
     font-size: 16px;
     cursor: pointer;
+    text-decoration: none;
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
     transition: 0.3s ease;
 }
