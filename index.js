@@ -90,6 +90,7 @@ startTimeRef.on('value', (snapshot) => {
     const diff = scheduledTime - now;
 
     if (diff <= 0) {
+      startFlagRef.set(true);
       startGeoguessr = true;
       geoguessr();
       countdownEl.textContent = "Starting...";
