@@ -10,10 +10,8 @@ const firebaseConfig = {
   measurementId: "G-R0ZPP9LS5V"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Firebase DB references
 const db = firebase.database();
 const startFlagRef = db.ref('startSlideshow');
 const startTimeRef = db.ref('startTime');
@@ -31,7 +29,7 @@ const images = [
   "Geoguessr5.jpg"
 ];
 
-// Show the image from Firebase index
+// Show image from index
 function showImageByIndex(index) {
   const geoguessrDiv = document.getElementById("geoguessr");
   const infoDiv = document.getElementById("information");
@@ -52,33 +50,33 @@ function showImageByIndex(index) {
 imageIndexRef.on('value', (snapshot) => {
   const index = snapshot.val();
   if (typeof index === "number" && index >= 0 && index < images.length) {
-    if (startGeoguessr) {
-      showImageByIndex(index);
-    }
+    showImageByIndex(index);  // ← always update when changed
   }
 });
 
 // Start Geoguessr view
 function geoguessr() {
   if (startGeoguessr) {
-    showImageByIndex(currentImageIndex); // fallback
+    showImageByIndex(currentImageIndex);
   } else {
     document.getElementById("information").style.display = "flex";
   }
 }
 
-// Manual override (e.g. from a button)
+// Manual override
 function setImage(index) {
   if (index >= 0 && index < images.length) {
-    imageIndexRef.set(index); // this updates for all users
+    imageIndexRef.set(index);
+    showImageByIndex(index);  // ← immediate update
   }
 }
 
-// Listen to Firebase start flag
+// Firebase start flag
 startFlagRef.on('value', (snapshot) => {
   const start = snapshot.val();
   if (start === true) {
     startGeoguessr = true;
+    geoguessr();
   } else {
     startGeoguessr = false;
     document.getElementById("information").style.display = "flex";
@@ -87,7 +85,7 @@ startFlagRef.on('value', (snapshot) => {
   }
 });
 
-// Countdown from Firebase time
+// Countdown
 const countdownEl = document.getElementById('countdown');
 
 startTimeRef.on('value', (snapshot) => {
@@ -120,12 +118,12 @@ startTimeRef.on('value', (snapshot) => {
   timerInterval = setInterval(updateCountdown, 1000);
 });
 
-// Home page view
+// Home view
 function home() {
   document.getElementById("geoguessr").style.display = "none";
   document.getElementById("message").style.display = "flex";
   document.getElementById("information").style.display = "none";
 }
 
-// Make setImage callable from buttons
+// Expose function globally
 window.setImage = setImage;
