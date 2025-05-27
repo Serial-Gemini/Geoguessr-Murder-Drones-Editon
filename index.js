@@ -50,7 +50,7 @@ function startImageLoop() {
                 currentImageIndex = 0;
             }
             imageEl.src = images[currentImageIndex];
-        }, 5000); // 12 hours
+        }, 43200000); // 12 hours
     }
 }
 
