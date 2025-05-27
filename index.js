@@ -10,12 +10,13 @@ const firebaseConfig = {
   measurementId: "G-R0ZPP9LS5V"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+// Firebase DB references
 const db = firebase.database();
 const startFlagRef = db.ref('startSlideshow');
 const startTimeRef = db.ref('startTime');
-const imageIndexRef = db.ref('imageIndex');
 
 let currentImageIndex = 0;
 let timerInterval = null;
@@ -29,54 +30,56 @@ const images = [
   "Geoguessr5.jpg"
 ];
 
-// Show image from index
-function showImageByIndex(index) {
+// Get the correct image index based on time passed since fixed base
+function getImageIndexByTime() {
+  const baseTime = new Date("2024-01-01T00:00:00Z").getTime(); // fixed reference point
+  const now = Date.now();
+  const diff = now - baseTime;
+  return Math.floor(diff / 43200000) % images.length; // 12-hour intervals
+}
+
+// Start Geoguessr mode
+function startImageLoop() {
   const geoguessrDiv = document.getElementById("geoguessr");
   const infoDiv = document.getElementById("information");
   const messageDiv = document.getElementById("message");
   const imageEl = document.getElementById("image");
 
-  currentImageIndex = index;
-
   geoguessrDiv.style.display = "flex";
   infoDiv.style.display = "none";
   messageDiv.style.display = "none";
 
+  // Set current image based on time
+  currentImageIndex = getImageIndexByTime();
   imageEl.src = images[currentImageIndex];
   document.getElementById("number").textContent = currentImageIndex + 1;
 }
 
-// Listen to image index changes
-imageIndexRef.on('value', (snapshot) => {
-  const index = snapshot.val();
-  if (typeof index === "number" && index >= 0 && index < images.length) {
-    showImageByIndex(index);  // ← always update when changed
-  }
-});
-
-// Start Geoguessr view
+// Show either Geoguessr or info depending on Firebase flag
 function geoguessr() {
   if (startGeoguessr) {
-    showImageByIndex(currentImageIndex);
+    startImageLoop();
   } else {
     document.getElementById("information").style.display = "flex";
   }
 }
 
-// Manual override
+// Manual override to any image by index
 function setImage(index) {
+  const imageEl = document.getElementById("image");
   if (index >= 0 && index < images.length) {
-    imageIndexRef.set(index);
-    showImageByIndex(index);  // ← immediate update
+    currentImageIndex = index;
+    imageEl.src = images[currentImageIndex];
+    document.getElementById("number").textContent = index + 1;
   }
 }
 
-// Firebase start flag
+// Listen to Firebase startSlideshow flag
 startFlagRef.on('value', (snapshot) => {
   const start = snapshot.val();
   if (start === true) {
     startGeoguessr = true;
-    geoguessr();
+    startImageLoop();
   } else {
     startGeoguessr = false;
     document.getElementById("information").style.display = "flex";
@@ -85,7 +88,7 @@ startFlagRef.on('value', (snapshot) => {
   }
 });
 
-// Countdown
+// Listen to countdown time
 const countdownEl = document.getElementById('countdown');
 
 startTimeRef.on('value', (snapshot) => {
@@ -118,12 +121,12 @@ startTimeRef.on('value', (snapshot) => {
   timerInterval = setInterval(updateCountdown, 1000);
 });
 
-// Home view
+// Home function
 function home() {
   document.getElementById("geoguessr").style.display = "none";
   document.getElementById("message").style.display = "flex";
   document.getElementById("information").style.display = "none";
 }
 
-// Expose function globally
+// Expose manual function globally (optional for button/testing)
 window.setImage = setImage;
