@@ -80,7 +80,10 @@ footer span {
 .manualOverride:hover {
     background-color: #292943;
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+    transform: translateY(5px);
 }
+.manualOverride:active {
+    transform: translateY(7px);
 #message {
     position: absolute;
     color: white;
