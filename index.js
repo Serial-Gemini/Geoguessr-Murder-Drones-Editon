@@ -122,16 +122,9 @@ startTimeRef.on('value', (snapshot) => {
     const minutes = Math.floor((diff % 3600000) / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
 
-    countdownEl.textContent = `Starts in ${hours}h ${minutes}m ${seconds}s`;
+    countdownEl.textContent = Starts in ${hours}h ${minutes}m ${seconds}s;
   };
 
   updateCountdown();
   timerInterval = setInterval(updateCountdown, 1000);
 });
-
-// Home function
-function home() {
-  document.getElementById("geoguessr").style.display = "none";
-  document.getElementById("message").style.display = "flex";
-  document.getElementById("information").style.display = "none";
-}
