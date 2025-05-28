@@ -122,7 +122,7 @@ startTimeRef.on('value', (snapshot) => {
     const minutes = Math.floor((diff % 3600000) / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
 
-    countdownEl.textContent = Starts in ${hours}h ${minutes}m ${seconds}s;
+    countdownEl.textContent = `Starts in ${hours}h ${minutes}m ${seconds}s`;
   };
 
   updateCountdown();
@@ -135,3 +135,9 @@ function home() {
   document.getElementById("message").style.display = "flex";
   document.getElementById("information").style.display = "none";
 }
+
+// *** FORCE slideshow start on page load to show correct image by time ***
+window.addEventListener('load', () => {
+  startGeoguessr = true;
+  startImageLoop();
+});
