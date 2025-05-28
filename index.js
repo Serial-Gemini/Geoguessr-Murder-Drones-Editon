@@ -30,15 +30,22 @@ const images = [
   "Geoguessr5.jpg"
 ];
 
-// Get the correct image index based on time passed since fixed base
+// Interval for 24 hours in milliseconds
+const intervalMs = 24 * 60 * 60 * 1000; // 24 hours
+
+// Base time: Jan 1, 2024, 2 PM Manila time (UTC+8)
+const baseTime = new Date("2024-01-01T14:00:00+08:00").getTime();
+
+// Calculate current image index based on 24-hour cycle from base time at 2 PM Manila
 function getImageIndexByTime() {
-  const baseTime = new Date("2024-01-01T00:00:00Z").getTime(); // fixed reference point
   const now = Date.now();
   const diff = now - baseTime;
-  return Math.floor(diff / 43200000) % images.length; // 12-hour intervals
+  // If diff negative (before base time), show first image (index 0)
+  if (diff < 0) return 0;
+  return Math.floor(diff / intervalMs) % images.length;
 }
 
-// Start Geoguessr mode
+// Start Geoguessr mode: show the current image based on time
 function startImageLoop() {
   const geoguessrDiv = document.getElementById("geoguessr");
   const infoDiv = document.getElementById("information");
@@ -49,13 +56,12 @@ function startImageLoop() {
   infoDiv.style.display = "none";
   messageDiv.style.display = "none";
 
-  // Set current image based on time
   currentImageIndex = getImageIndexByTime();
   imageEl.src = images[currentImageIndex];
   document.getElementById("number").textContent = currentImageIndex + 1;
 }
 
-// Show either Geoguessr or info depending on Firebase flag
+// Show Geoguessr or info depending on Firebase flag
 function geoguessr() {
   if (startGeoguessr) {
     startImageLoop();
@@ -74,7 +80,7 @@ function setImage(index) {
   }
 }
 
-// New function to go to the next image cyclically
+// Next image cyclically, for override button
 function nextImage() {
   setImage((currentImageIndex + 1) % images.length);
 }
@@ -96,7 +102,7 @@ startFlagRef.on('value', (snapshot) => {
   }
 });
 
-// Listen to countdown time
+// Countdown timer logic for next scheduled start time from Firebase
 const countdownEl = document.getElementById('countdown');
 
 startTimeRef.on('value', (snapshot) => {
@@ -129,15 +135,9 @@ startTimeRef.on('value', (snapshot) => {
   timerInterval = setInterval(updateCountdown, 1000);
 });
 
-// Home function
+// Home function to hide Geoguessr and show message
 function home() {
   document.getElementById("geoguessr").style.display = "none";
   document.getElementById("message").style.display = "flex";
   document.getElementById("information").style.display = "none";
 }
-
-// *** FORCE slideshow start on page load to show correct image by time ***
-window.addEventListener('load', () => {
-  startGeoguessr = true;
-  startImageLoop();
-});
