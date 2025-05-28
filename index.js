@@ -10,10 +10,18 @@ const firebaseConfig = {
   measurementId: "G-R0ZPP9LS5V"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+
+// Firebase DB references
 const db = firebase.database();
 const startFlagRef = db.ref('startSlideshow');
 const startTimeRef = db.ref('startTime');
+
+let currentImageIndex = 0;
+let timerInterval = null;
+let startGeoguessr = false;
+let overrideEnabled = false; // only allow override after 24hr mark
 
 const images = [
   "Geoguessr1.jpg",
@@ -23,112 +31,100 @@ const images = [
   "Geoguessr5.jpg"
 ];
 
-let currentImageIndex = 0;
-let timerInterval = null;
-let startGeoguessr = false;
-let manualOverrideAllowed = false;
-
-const imageEl = document.getElementById("image");
-const countdownEl = document.getElementById("countdown");
-const numberEl = document.getElementById("number");
-
-// Set a base time to align image changes every 24 hours
-const baseTime = new Date("2025-05-28T14:00:00+08:00").getTime(); // 3rd image baseline
-
-function getImageIndexByTime(serverTime) {
-  const diff = serverTime - baseTime;
-  return Math.floor(diff / 86400000) % images.length; // 24-hour intervals
-}
-
-function setImage(index) {
-  if (index >= 0 && index < images.length) {
-    currentImageIndex = index;
-    imageEl.src = images[currentImageIndex];
-    numberEl.textContent = currentImageIndex + 1;
-  }
-}
-
-function startImageLoop(serverTime) {
+// Start Geoguessr mode
+function startImageLoop() {
   const geoguessrDiv = document.getElementById("geoguessr");
   const infoDiv = document.getElementById("information");
   const messageDiv = document.getElementById("message");
+  const imageEl = document.getElementById("image");
 
   geoguessrDiv.style.display = "flex";
   infoDiv.style.display = "none";
   messageDiv.style.display = "none";
 
-  const index = getImageIndexByTime(serverTime);
-  setImage(index);
+  // Temporarily force default image to Geoguessr3
+  currentImageIndex = 2;
+  imageEl.src = images[currentImageIndex];
+  document.getElementById("number").textContent = currentImageIndex + 1;
 }
 
-function geoguessr(serverTime) {
+// Show Geoguessr or info depending on Firebase flag
+function geoguessr() {
   if (startGeoguessr) {
-    startImageLoop(serverTime);
+    startImageLoop();
   } else {
     document.getElementById("information").style.display = "flex";
   }
 }
 
-function nextImage() {
-  if (manualOverrideAllowed) {
-    setImage((currentImageIndex + 1) % images.length);
+// Manually set image (used by override)
+function setImage(index) {
+  const imageEl = document.getElementById("image");
+  if (index >= 0 && index < images.length) {
+    currentImageIndex = index;
+    imageEl.src = images[currentImageIndex];
+    document.getElementById("number").textContent = index + 1;
   }
 }
 
+// Next image function - only works if overrideEnabled is true
+function nextImage() {
+  if (!overrideEnabled) return;
+  setImage((currentImageIndex + 1) % images.length);
+}
+
+window.setImage = setImage;
 window.nextImage = nextImage;
 
-// Get accurate server time offset
-firebase.database().ref("/.info/serverTimeOffset").on("value", function (snapshot) {
-  const offset = snapshot.val();
-  const estimatedServerTimeMs = Date.now() + offset;
-
-  // Check slideshow state
-  startFlagRef.on('value', (snapshot) => {
-    const start = snapshot.val();
-    if (start === true) {
-      startGeoguessr = true;
-      startImageLoop(estimatedServerTimeMs);
-    } else {
-      startGeoguessr = false;
-      document.getElementById("information").style.display = "flex";
-      document.getElementById("geoguessr").style.display = "none";
-      document.getElementById("message").style.display = "none";
-    }
-  });
-
-  // Countdown to next day
-  startTimeRef.on('value', (snapshot) => {
-    const scheduledTime = snapshot.val();
-    if (!scheduledTime) return;
-
-    if (timerInterval) clearInterval(timerInterval);
-
-    const updateCountdown = () => {
-      const now = estimatedServerTimeMs;
-      const diff = scheduledTime - now;
-
-      if (diff <= 0) {
-        startFlagRef.set(true);
-        startGeoguessr = true;
-        manualOverrideAllowed = true;
-        geoguessr(now);
-        countdownEl.textContent = "Starting...";
-        clearInterval(timerInterval);
-        return;
-      }
-
-      const hours = Math.floor(diff / 3600000);
-      const minutes = Math.floor((diff % 3600000) / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-
-      countdownEl.textContent = `Starts in ${hours}h ${minutes}m ${seconds}s`;
-    };
-
-    updateCountdown();
-    timerInterval = setInterval(updateCountdown, 1000);
-  });
+// Listen to Firebase startSlideshow flag
+startFlagRef.on('value', (snapshot) => {
+  const start = snapshot.val();
+  if (start === true) {
+    startGeoguessr = true;
+    startImageLoop();
+  } else {
+    startGeoguessr = false;
+    document.getElementById("information").style.display = "flex";
+    document.getElementById("geoguessr").style.display = "none";
+    document.getElementById("message").style.display = "none";
+  }
 });
 
+// Listen to countdown time
+const countdownEl = document.getElementById('countdown');
+
+startTimeRef.on('value', (snapshot) => {
+  const scheduledTime = snapshot.val();
+  if (!scheduledTime) return;
+
+  if (timerInterval) clearInterval(timerInterval);
+
+  const updateCountdown = () => {
+    const now = Date.now();
+    const diff = scheduledTime - now;
+
+    if (diff <= 0) {
+      startFlagRef.set(true);
+      startGeoguessr = true;
+      geoguessr();
+      countdownEl.textContent = "Starting...";
+      overrideEnabled = true; // enable override button
+      clearInterval(timerInterval);
+      return;
+    }
+
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    countdownEl.textContent = `Starts in ${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  updateCountdown();
+  timerInterval = setInterval(updateCountdown, 1000);
+});
+
+// Home function
 function home() {
   document.getElementById("geoguessr").style.display = "none";
   document.getElementById("message").style.display = "flex";
