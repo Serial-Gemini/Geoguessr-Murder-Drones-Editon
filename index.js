@@ -128,3 +128,10 @@ startTimeRef.on('value', (snapshot) => {
   updateCountdown();
   timerInterval = setInterval(updateCountdown, 1000);
 });
+
+// Home function
+function home() {
+  document.getElementById("geoguessr").style.display = "none";
+  document.getElementById("message").style.display = "flex";
+  document.getElementById("information").style.display = "none";
+}
