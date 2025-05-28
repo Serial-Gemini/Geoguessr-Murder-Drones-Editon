@@ -1,4 +1,4 @@
-// Firebase config (same)
+// Firebase config (your existing config)
 const firebaseConfig = {
   apiKey: "AIzaSyBa3LAxLXG6RjZ8-QoL0Sgqt38znDPqpso",
   authDomain: "geoguessr---murder-drones.firebaseapp.com",
@@ -19,29 +19,23 @@ const startTimeRef = db.ref('startTime');
 const images = [
   "Geoguessr1.jpg",
   "Geoguessr2.jpg",
-  "Geoguessr3.jpg", // index 2, default image
+  "Geoguessr3.jpg", // index 2 = default image
   "Geoguessr4.jpg",
   "Geoguessr5.jpg"
 ];
 
-const intervalMs = 24 * 60 * 60 * 1000; // 24 hours
+// 24-hour interval in milliseconds
+const intervalMs = 24 * 60 * 60 * 1000;
+
+// The "base time" for cycling images (example: Jan 1, 2024, 2 PM UTC+8)
 const baseTime = new Date("2024-01-01T14:00:00+08:00").getTime();
 
-let currentImageIndex = 2; // start at image 3 by default
+let currentImageIndex = 2; // Start at 3rd image by default
 let timerInterval = null;
 let startGeoguessr = false;
-let overrideEnabled = false; // disable override button initially
+let overrideEnabled = false; // Override button disabled initially
 
-// Get current image index based on 24h cycle from base time
-function getImageIndexByTime() {
-  const now = Date.now();
-  const diff = now - baseTime;
-  if (diff < 0) return 2; // before baseTime, show 3rd image (index 2)
-  const indexFromCycle = Math.floor(diff / intervalMs) % images.length;
-  return indexFromCycle >= 2 ? indexFromCycle : 2; // never go below index 2 after baseTime
-}
-
-// Show image and update UI
+// Helper: Show image by index and update UI
 function showImage(index) {
   const imageEl = document.getElementById("image");
   imageEl.src = images[index];
@@ -49,24 +43,7 @@ function showImage(index) {
   currentImageIndex = index;
 }
 
-// Start slideshow mode: decide which image to show
-function startImageLoop() {
-  const geoguessrDiv = document.getElementById("geoguessr");
-  const infoDiv = document.getElementById("information");
-  const messageDiv = document.getElementById("message");
-  geoguessrDiv.style.display = "flex";
-  infoDiv.style.display = "none";
-  messageDiv.style.display = "none";
-
-  const index = getImageIndexByTime();
-  showImage(index);
-
-  // Enable override button only if index is 3 or higher (meaning 24h passed)
-  overrideEnabled = index >= 3;
-  updateOverrideButtonState();
-}
-
-// Disable or enable the override button visually and functionally
+// Helper: Enable or disable the override button based on overrideEnabled flag
 function updateOverrideButtonState() {
   const btn = document.querySelector(".manualOverride");
   if (overrideEnabled) {
@@ -78,18 +55,57 @@ function updateOverrideButtonState() {
   }
 }
 
-// Override button handler
-function nextImage() {
-  if (!overrideEnabled) return; // do nothing if override disabled
+// Determine which image to show based on time and baseTime
+function getImageIndexByTime() {
+  const now = Date.now();
+  const diff = now - baseTime;
 
-  // move to next image cyclically
-  let nextIndex = (currentImageIndex + 1) % images.length;
+  if (diff < 0) {
+    // Before base time, always show the third image (index 2)
+    return 2;
+  } else {
+    // Calculate how many 24h intervals passed since base time
+    const intervalsPassed = Math.floor(diff / intervalMs);
+
+    // Start cycling from index 3 onwards after base time + 24h intervals
+    // So first interval after baseTime shows index 3, second interval index 4, etc.
+    const index = 2 + intervalsPassed; // index >= 2
+
+    // Wrap around if index exceeds images.length - 1
+    return index % images.length;
+  }
+}
+
+// Called when slideshow should start or update image
+function startImageLoop() {
+  const geoguessrDiv = document.getElementById("geoguessr");
+  const infoDiv = document.getElementById("information");
+  const messageDiv = document.getElementById("message");
+
+  geoguessrDiv.style.display = "flex";
+  infoDiv.style.display = "none";
+  messageDiv.style.display = "none";
+
+  const index = getImageIndexByTime();
+  showImage(index);
+
+  // Enable override only if image index is 3 or greater (meaning after 24h passed)
+  overrideEnabled = index >= 3;
+  updateOverrideButtonState();
+}
+
+// Override button click handler
+function nextImage() {
+  if (!overrideEnabled) return; // Do nothing if override disabled
+
+  // Show next image cyclically
+  const nextIndex = (currentImageIndex + 1) % images.length;
   showImage(nextIndex);
 }
 
 window.nextImage = nextImage;
 
-// Firebase startSlideshow flag listener
+// Listen to Firebase startSlideshow flag
 startFlagRef.on('value', (snapshot) => {
   const start = snapshot.val();
   if (start === true) {
@@ -103,7 +119,7 @@ startFlagRef.on('value', (snapshot) => {
   }
 });
 
-// Countdown timer for scheduled start time
+// Countdown timer to scheduled start time from Firebase
 const countdownEl = document.getElementById('countdown');
 
 startTimeRef.on('value', (snapshot) => {
@@ -117,14 +133,17 @@ startTimeRef.on('value', (snapshot) => {
     const diff = scheduledTime - now;
 
     if (diff <= 0) {
+      // Time passed, start slideshow and update override button
       startFlagRef.set(true);
       startGeoguessr = true;
       startImageLoop();
+
       countdownEl.textContent = "Starting...";
       clearInterval(timerInterval);
       return;
     }
 
+    // Show countdown time remaining
     const hours = Math.floor(diff / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
@@ -136,7 +155,7 @@ startTimeRef.on('value', (snapshot) => {
   timerInterval = setInterval(updateCountdown, 1000);
 });
 
-// Show info screen on Home link click
+// Home button to show message and hide geoguessr
 function home() {
   document.getElementById("geoguessr").style.display = "none";
   document.getElementById("message").style.display = "flex";
