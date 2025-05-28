@@ -30,37 +30,12 @@ const images = [
   "Geoguessr5.jpg"
 ];
 
-// Get the correct image index based on time and schedule
+// Get the correct image index based on time passed since fixed base
 function getImageIndexByTime() {
+  const baseTime = new Date("2024-01-01T00:00:00Z").getTime(); // fixed reference point
   const now = Date.now();
-
-  // Set 2 PM today in local timezone
-  const twoPmToday = new Date();
-  twoPmToday.setHours(14, 0, 0, 0);
-
-  // Set 2 PM tomorrow
-  const twoPmTomorrow = new Date(twoPmToday);
-  twoPmTomorrow.setDate(twoPmToday.getDate() + 1);
-
-  if (now < twoPmToday.getTime()) {
-    // Before 2 PM today, show image #2 (index 1) or adjust if you want
-    return 1;
-  } else if (now >= twoPmToday.getTime() && now < twoPmTomorrow.getTime()) {
-    // Between 2 PM today and 2 PM tomorrow: show 3rd image (index 2)
-    return 2;
-  } else {
-    // After 2 PM tomorrow: cycle images every 12 hours starting from 4th image (index 3)
-    const baseTime = twoPmTomorrow.getTime();
-    const diff = now - baseTime;
-
-    // Rotate images starting from index 3, then wrap around
-    const rotationImages = images.slice(3).concat(images.slice(0, 3)); // [index 3,4,0,1,2]
-
-    const indexInRotation = Math.floor(diff / 43200000) % rotationImages.length;
-    const rotatedImageSrc = rotationImages[indexInRotation];
-
-    return images.indexOf(rotatedImageSrc);
-  }
+  const diff = now - baseTime;
+  return Math.floor(diff / 43200000) % images.length; // 12-hour intervals
 }
 
 // Start Geoguessr mode
@@ -98,6 +73,14 @@ function setImage(index) {
     document.getElementById("number").textContent = index + 1;
   }
 }
+
+// New function to go to the next image cyclically
+function nextImage() {
+  setImage((currentImageIndex + 1) % images.length);
+}
+
+window.setImage = setImage;
+window.nextImage = nextImage;
 
 // Listen to Firebase startSlideshow flag
 startFlagRef.on('value', (snapshot) => {
@@ -152,6 +135,3 @@ function home() {
   document.getElementById("message").style.display = "flex";
   document.getElementById("information").style.display = "none";
 }
-
-// Expose manual function globally (optional for button/testing)
-window.setImage = setImage;
