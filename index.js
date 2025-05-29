@@ -42,8 +42,8 @@ function startImageLoop() {
   infoDiv.style.display = "none";
   messageDiv.style.display = "none";
 
-  // Temporarily force default image to Geoguessr3
-  currentImageIndex = 2;
+  // Temporarily force default image to Geoguessr4
+  currentImageIndex = 3;
   imageEl.src = images[currentImageIndex];
   document.getElementById("number").textContent = currentImageIndex + 1;
 }
